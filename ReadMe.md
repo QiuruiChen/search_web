@@ -1,7 +1,7 @@
 ### Situation:
 
 Keyword search html pages ( data from azure sql server ).
-![data structure](./data/pics/sql_data_structure.png)
+![data structure](./doc/sql_data_structure.png)
 
 Semantic search on online pdf attachments (above `attachemnts` field).
 
