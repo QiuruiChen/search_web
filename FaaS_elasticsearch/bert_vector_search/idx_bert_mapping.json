@@ -1,0 +1,31 @@
+{
+  "settings": {
+      "index":{
+        "number_of_shards":"1",
+        "number_of_replicas":"2"
+      }
+  },
+  "mappings": {
+    "dynamic": "true",
+    "_source": {
+      "enabled": "true"
+    },
+    "properties":{
+      "url": {
+        "type": "text",
+        "index": false
+        },
+      "text": {
+        "type": "text"
+      },
+      "contentId":{
+        "type":"integer",
+        "index": false
+      },
+      "text_vector": {
+        "type": "dense_vector",
+        "dims": 768
+      }
+    }
+  }
+}

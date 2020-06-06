@@ -1,0 +1,189 @@
+### =============================================
+### Content Search (on `idx_content`)
+### =============================================
+
+### ================= Default ===================
+# Default: By relevance:
+# to check fuziness setting: https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-fuzzy-query.html
+GET idx_content/_search
+{
+  "query": {
+    "multi_match" : {
+      "query":    "Stichting Verdriet",
+      "fields": [ "titel", "omschrijving","tekst","auteur","tagNamen","documentNamen","aangemaaktDoor" ],
+      "type":"most_fields",
+      "fuzziness" : "AUTO"
+    }
+  }
+}
+# add phrase search: change the above into "type":  "phrase_prefix"
+
+### =================== Filter =================
+### Filter based on a specific organizationID, s.t organisatieId=1
+GET idx_content/_search
+{
+  "query": {
+    "bool" : {
+     "filter": {
+       "term": {
+           "organisatieid" : 1
+       }
+     },
+     "should": [
+       {
+         "multi_match" : {
+           "query":    "Stichting Verdriet",
+           "fields": [ "titel", "omschrijving","tekst","auteur","tagNamen","documentNamen","aangemaaktDoor" ],
+           "type":"most_fields",
+           "fuzziness" : "AUTO"
+         }
+       }
+     ],
+   "minimum_should_match" : 1
+   }
+  }
+}
+
+### Filter based on classificatieNaam: {"classificatienaam" : "bite"} or {"classificatienaam" : "content"}
+
+GET idx_content/_search
+{
+  "query": {
+     "bool" : {
+      "filter": {
+        "term": {
+            "classificatienaam" : "bite"
+        }
+      },
+      "should": [
+        {
+          "multi_match" : {
+            "query":    "Stichting Verdriet",
+            "fields": [ "titel", "omschrijving","tekst","auteur","tagNamen","documentNamen","aangemaaktDoor" ],
+            "type":"most_fields",
+            "fuzziness" : "AUTO"
+          }
+        }
+      ],
+    "minimum_should_match" : 1
+    }
+  }
+}
+
+
+### Filter by themaNamen
+### below shows themanamen should contain `Communicatie en samenwerken` and `Ziektebeelden`
+GET idx_content/_search
+{
+  "query": {
+     "bool" : {
+      "filter": [
+         {
+             "match_phrase": {
+                "themanamen" : "Communicatie en samenwerken"
+             }
+         },
+         {
+             "match_phrase": {
+                "themanamen" : "Ziektebeelden"
+             }
+         }
+        ],
+      "should": [
+        {
+          "multi_match" : {
+            "query":    "Stichting Verdriet",
+            "fields": [ "titel", "omschrijving","tekst","auteur","tagNamen","documentNamen","aangemaaktDoor" ],
+            "type":"most_fields",
+            "fuzziness" : "AUTO"
+          }
+        }
+      ],
+    "minimum_should_match" : 1
+    }
+  }
+}
+### Filter by themaNamen
+# below shows themanamen should conatin `Communicatie en samenwerken` or `Ziektebeelden`
+GET idx_content/_search
+{
+  "query": {
+     "bool" : {
+      "must":{
+        "multi_match" : {
+            "query":    "stichting verdriet",
+            "fields": [ "titel", "omschrijving","tekst","auteur","tagNamen","documentNamen","aangemaaktDoor" ],
+            "type":"most_fields",
+            "fuzziness" : "AUTO"
+          }
+      },
+      "should": [
+        {
+           "match_phrase": {
+              "themanamen" : "communicatie en samenwerken"
+           }
+         },
+       {
+           "match_phrase": {
+              "themanamen" : "ziektebeelden"
+           }
+       }
+      ],
+    "minimum_should_match" : 1
+    }
+  }
+}
+### Filter by typeNaam, similar with themaNamen
+### Filter by pakketNaam, similar with themaNamen
+
+### ==================== Sorting ====================
+
+# sort by numeric fields: aangemaaktOp,pageviews,Beoordeling,duur,
+# sort by alphabet: titel.raw (desc=>from z to a)
+
+GET idx_content/_search
+{
+  "query": {
+    "multi_match" : {
+      "query":    "Stichting Verdriet",
+      "fields": [ "titel", "omschrijving","tekst","auteur","tagNamen","documentNamen","aangemaaktDoor" ],
+      "type":"most_fields",
+      "fuzziness" : "AUTO"
+    }
+  },
+  "sort": [
+        { "titel.raw": "desc" }
+    ]
+}
+
+### =============================================
+### Attachment search (on `idx_attachments`)
+### =============================================
+GET idx_attachments/_search
+
+### key word search:
+GET idx_attachments/_search
+{
+    "query": {
+       "match" : {
+            "text" : "hoe intramusculair te injecteren"
+        }
+    }
+}
+
+### semantic search: cosine similarity between quert and text bert vectors
+GET idx_attachments/_search
+{
+  "query" : {
+  "script_score": {
+    "query": {
+       "match_all" : {}
+    },
+    "script": {
+      "source": "cosineSimilarity(params.query_vector, 'text_vector') + 1.0",
+      "params": {"query_vector": query_vector
+        }
+      }
+    }
+  }
+}

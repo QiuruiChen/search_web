@@ -1,0 +1,254 @@
+### =======================
+## set for idx_content
+### =======================
+
+DELETE idx_content
+
+PUT _template/idx_content
+{
+  "order": 10,
+  "index_patterns": [
+    "idx_content*"
+    ],
+    "settings": {
+      "index":{
+        "number_of_shards":"1",
+        "number_of_replicas":"2"
+      },
+    "analysis": {
+      "analyzer": {
+        # settup the analyzer for the keyword, seperate keywords based on ','
+        "customized_keyword_analyzer": {
+          "tokenizer": "keyword",
+          "filter": [ "my_custom_word_delimiter_graph_filter"]
+        },
+        "custom_no_HTML_analyzer": {
+         "type": "custom",
+          "char_filter": ["html_strip"],
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "dutch_stop",
+            "dutch_keywords",
+            "dutch_override",
+            "dutch_stemmer"
+          ]
+        },
+        "custome_dutch_analyzer": {
+          "tokenizer":  "standard",
+          "filter": [
+            "lowercase",
+            "dutch_stop",
+            "dutch_keywords",
+            # protect some words from stem
+            "dutch_override",
+            "dutch_stemmer",
+            #"dutch_stemmer_v2"
+          ]
+        },
+        "custom_no_HTML_decompound_analyzer": {
+         "type": "custom",
+          "char_filter": ["html_strip"],
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "dutch_stop",
+            "dutch_keywords",
+            "dutch_decompounder",
+            "dutch_override",
+            "dutch_stemmer"
+          ],
+        "custome_dutch_decompound_analyzer": {
+          "tokenizer":  "standard",
+          "filter": [
+            "lowercase",
+            "dutch_stop",
+            "dutch_keywords",
+            "dutch_decompounder",
+            "dutch_override",
+            "dutch_stemmer",
+            #"dutch_stemmer_v2"
+          ]
+        }
+      },
+      "filter": {
+        "my_custom_word_delimiter_graph_filter": {
+          "type": "word_delimiter_graph",
+          # question: do i need to add to lower the keyword? or the query and keyword cases match with eachother?
+          # remain whiteshape as alphabet, so it is not seperable
+          "type_table": [ "\\u0020 => ALPHA" ],
+          "split_on_case_change": false,
+          "split_on_numerics": false,
+          #"stem_english_possessive": true
+        },
+        "dutch_stop": {
+          "type":       "stop",
+          "stopwords":  "_dutch_"
+        },
+        "dutch_keywords": {
+          "type":       "keyword_marker",
+          # do not stem these words
+          "keywords":   ["TH","VVT","JZ","GGZ","FAQ","RIVM","INR","PGB","MRSA"]
+        },
+        "dutch_stemmer": {
+          "type":       "stemmer",
+          "language":   "dutch"
+        },
+        "dutch_override": {
+          "type":       "stemmer_override",
+          "rules": [
+            "fiets=>fiets"
+          ]
+        },
+        # applying a Snowball-generated stemmer
+        "dutch_stemmer_v2" : {
+            "type" : "snowball",
+            "language" : "Dutch"
+        },
+        "dutch_synonym" : {
+            "type" : "synonym",
+            #(relative to the config location).
+            #"synonyms_path" : "analysis/synonym.txt",
+            "synonyms" : [
+                "i-pod, i pod => ipod",
+                "universe, cosmos"
+            ]
+        },
+        "dutch_decompounder": {
+          "type": "hyphenation_decompounder",
+          # uploading file in elastic search: https://www.elastic.co/guide/en/cloud/current/ec-custom-bundles.html
+          "hyphenation_patterns_path": "hyphenation_patterns.xml",
+          # compound word list: https://en.wiktionary.org/wiki/Category:Dutch_compound_words
+          "word_list": ["aan", "aal", "aard","achter","af","appel"],
+          "max_subword_size": 22
+        }
+      }
+    }
+  },
+  "mappings": {
+      "doc":{
+        "properties":{
+          "contentId":{
+            "type":"integer"
+            "index":false
+          }
+          "titel":{
+            "type":"text",
+            "analyzer": "custome_dutch_analyzer",
+            "fields": {
+              "titel_decompounds": {
+                "type":  "text",
+                "analyzer":"custome_dutch_decompound_analyzer"
+              }
+          }
+        }
+        "omschrijving":{
+          "type":"text"
+          "analyzer": "custome_dutch_analyzer",
+          "fields": {
+            "omschrijving_decompounds": {
+              "type":  "text",
+              "analyzer":"custome_dutch_decompound_analyzer"
+            }
+          }
+        }
+        "tekst":{
+          "type":"text"
+          "analyzer": "custom_no_HTML_analyzer",
+          "fields": {
+            "tekst_decompounds": {
+              "type":  "text",
+              "analyzer":"custom_no_HTML_decompound_analyzer"
+            }
+        }
+      }
+        "auteur":{
+            "type":"text"
+            "analyzer": "custome_dutch_analyzer"
+        }
+        "jaarPublicatie":{"type":"integer"}
+        "pakketNamen":{
+          "type":"keyword"
+          "analyzer":"customized_keyword_analyzer"
+        }
+        "themaNamen":{
+          "type":"keyword"
+          "analyzer":"customized_keyword_analyzer"
+        }
+        "tagNamen":{
+          "type":"text"
+          "analyzer": "custome_dutch_analyzer"
+        }
+        "documentNamen":{
+            "type":"text"
+            "analyzer": "custome_dutch_analyzer"
+        }
+        "classificatieNaam":{
+          "type":"keyword"
+          "analyzer":"customized_keyword_analyzer"
+        }
+        "typeNaam":{
+          "type":"keyword"
+          "analyzer":"customized_keyword_analyzer"
+        }
+        "aangemaaktDoor":{
+            "type":"text"
+            "analyzer": "custome_dutch_analyzer"
+        }
+        "aangemaaktOp":{
+            "type":"date"
+            "analyzer":"customized_keyword_analyzer"
+        }
+        "duur":{
+            "type":"integer" #keyword?
+        }
+        "beoordeling":{"type":"integer"}
+        "aantalBeoordelingen":{"type":"integer"}
+        "pageviews":{"type":"integer"}
+        "timestamp":{"type":"date"}
+        } # end properties
+      } #end doc
+    } #end mapping
+}
+GET /idx_firstsqlserver/_mapping
+
+GET idx_firstsqlserver/_search
+
+### =======================
+## set for idex_attachments
+### =======================
+
+DELETE idx_attachments
+
+PUT _template/idx_attachments
+{
+  "settings": {
+      "index":{
+        "number_of_shards":"1",
+        "number_of_replicas":"1"
+      }
+  },
+  "mappings": {
+      "dynamic": "true",
+      "_source": {
+        "enabled": "true"
+      },
+      "properties": {
+        "url": {
+          "type": "text",
+          "index": false
+        },
+        "text": {
+          "type": "text"
+        },
+        "contentId":{
+          "type":"integer",
+          "index": false
+        },
+        "text_vector": {
+          "type": "dense_vector",
+          "dims": 768
+        }
+      }
+    }
+}
