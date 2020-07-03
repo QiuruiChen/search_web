@@ -1,13 +1,18 @@
-### Situation:
+# Elasticsearch on website:
 
-Keyword search html pages ( data from azure sql server ).
-![data structure](./doc/sql_data_structure.png)
+## Aim: Elasticsearch on data from sql server
 
-Semantic search on online pdf attachments (above `attachemnts` field).
+Search from
+    - Fileds in sql table
+    - extracted content from online pdf
 
-### Solutions:
+Methods:
+    - key word search
+    - semantic search (similarity between query and text bert feature vectors)
 
-Solution1: logstash to scheduly ingest data from sql server to elasticsearch.
+### Data ingestion solutions:
 
-Solution 2: FaaS to activate python code scheduly to ingest/index data into elasticserch.
+Solution1: Applying [logstash](./logstash_elasticsearch) to bulk data into elasticsearch
+
+Solution 2: Run [python functionto](./FaaS_elasticsearch) bulk data into elasticsearch
 

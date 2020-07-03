@@ -1,0 +1,212 @@
+{
+  "aliases" : { },
+  "mappings" : {
+    "properties" : {
+      "aangemaaktDoor" : {
+        "type" : "text",
+        "boost" : 1.5,
+        "analyzer" : "custome_dutch_analyzer"
+      },
+      "aangemaaktOp" : {
+        "type" : "text"
+      },
+      "aantalBeoordelingen" : {
+        "type" : "integer"
+      },
+      "auteur" : {
+        "type" : "text",
+        "boost" : 1.5,
+        "analyzer" : "custome_dutch_analyzer"
+      },
+      "beoordeling" : {
+        "type" : "integer"
+      },
+      "classificatieNaam" : {
+        "type" : "text"
+      },
+      "contentId" : {
+        "type" : "integer",
+        "index" : false
+      },
+      "documentNamen" : {
+        "type" : "text",
+        "analyzer" : "custome_dutch_analyzer"
+      },
+      "duur" : {
+        "type" : "integer"
+      },
+      "jaarPublicatie" : {
+        "type" : "integer"
+      },
+      "omschrijving" : {
+        "type" : "text",
+        "boost" : 1.5,
+        "analyzer" : "custome_dutch_analyzer"
+      },
+      "organisatieid" : {
+        "type" : "long"
+      },
+      "pageviews" : {
+        "type" : "integer"
+      },
+      "pakketNamen" : {
+        "type" : "text"
+      },
+      "tagNamen" : {
+        "type" : "text",
+        "boost" : 2.0,
+        "analyzer" : "custome_dutch_analyzer"
+      },
+      "tekst" : {
+        "type" : "text",
+        "boost" : 1.5,
+        "analyzer" : "custom_no_HTML_analyzer",
+        "search_analyzer" : "custome_dutch_analyzer"
+      },
+      "themaNamen" : {
+        "type" : "text"
+      },
+      "timestamp" : {
+        "type" : "date"
+      },
+      "titel" : {
+        "type" : "text",
+        "boost" : 2.0,
+        "fields" : {
+          "raw" : {
+            "type" : "keyword"
+          }
+        },
+        "analyzer" : "custome_dutch_analyzer"
+      },
+      "typeNaam" : {
+        "type" : "text"
+      },
+      "attach_url1" : {
+        "type" : "text"
+      },
+      "attachment_text1" : {
+        "type" : "text",
+        "analyzer" : "custome_dutch_analyzer"
+      },
+      "attach_url2" : {
+        "type" : "text"
+      },
+      "attachment_text2" : {
+        "type" : "text",
+        "analyzer" : "custome_dutch_analyzer"
+      },
+      "attach_url3" : {
+        "type" : "text"
+      },
+      "attachment_text3" : {
+        "type" : "text",
+        "analyzer" : "custome_dutch_analyzer"
+      },
+      "attach_url4" : {
+        "type" : "text"
+      },
+      "attachment_text4" : {
+        "type" : "text",
+        "analyzer" : "custome_dutch_analyzer"
+      },
+      "attach_url5" : {
+        "type" : "text"
+      },
+      "attachment_text5" : {
+        "type" : "text",
+        "analyzer" : "custome_dutch_analyzer"
+      }
+    }
+  },
+  "settings" : {
+    "index" : {
+      "number_of_shards" : "1",
+      "analysis" : {
+        "filter" : {
+          "dutch_override" : {
+            "type" : "stemmer_override",
+            "rules" : [
+              "fiets=>fiets"
+            ]
+          },
+          "dutch_stemmer_v2" : {
+            "type" : "snowball",
+            "language" : "Dutch"
+          },
+          "dutch_synonym" : {
+            "type" : "synonym",
+            "synonyms" : [
+              "i-pod, i pod => ipod",
+              "universe, cosmos"
+            ]
+          },
+          "dutch_stop" : {
+            "type" : "stop",
+            "stopwords" : "_dutch_"
+          },
+          "my_custom_word_delimiter_graph_filter" : {
+            "split_on_numerics" : "false",
+            "split_on_case_change" : "false",
+            "type" : "word_delimiter_graph",
+            "type_table" : [
+              "\\u0020 => ALPHA"
+            ]
+          },
+          "dutch_stemmer" : {
+            "type" : "stemmer",
+            "language" : "dutch"
+          },
+          "dutch_keywords" : {
+            "keywords" : [
+              "TH",
+              "VVT",
+              "JZ",
+              "GGZ",
+              "FAQ",
+              "RIVM",
+              "INR",
+              "PGB",
+              "MRSA"
+            ],
+            "type" : "keyword_marker"
+          }
+        },
+        "analyzer" : {
+          "custom_no_HTML_analyzer" : {
+            "filter" : [
+              "lowercase",
+              "dutch_stop",
+              "dutch_keywords",
+              "dutch_override",
+              "dutch_stemmer"
+            ],
+            "char_filter" : [
+              "html_strip"
+            ],
+            "type" : "custom",
+            "tokenizer" : "standard"
+          },
+          "custome_dutch_analyzer" : {
+            "filter" : [
+              "lowercase",
+              "dutch_stop",
+              "dutch_keywords",
+              "dutch_override",
+              "dutch_stemmer"
+            ],
+            "type" : "custom",
+            "tokenizer" : "standard"
+          },
+          "rebuilt_keyword" : {
+            "filter" : [
+              "my_custom_word_delimiter_graph_filter"
+            ],
+            "tokenizer" : "keyword"
+          }
+        }
+      },
+      "number_of_replicas" : "1"
+    }
+  }
+}

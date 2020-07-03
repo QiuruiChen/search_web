@@ -1,0 +1,5 @@
+elasticsearch>=7.8.0
+tika>=1.24
+pyodbc==4.0.28
+pandas>=0.24.2
+validators==0.15.0

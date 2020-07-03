@@ -1,0 +1,46 @@
+version: '3.7'
+services:
+  indexer:
+    build: ./indexer
+    environment:
+      DB_SERVER: /run/secrets/db_server
+      DB_USER: /run/secrets/db_user
+      DB_PASS: /run/secrets/db_passwords
+      DB_DBNAME: /run/secrets/db_database
+    secrets:
+      - db_server
+      - db_user
+      - db_passwords
+      - db_database
+    depends_on:
+      - elasticsearch
+
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+    healthcheck:
+          start_period: 15s
+          test: ["CMD", "curl", "-f", "http://localhost:9200"]
+          interval: 10s
+          timeout: 2s
+          retries: 5
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    tty: true
+    environment:
+      discovery.type: single-node
+
+volumes:
+  es-data:
+    driver: local
+secrets:
+  db_server:
+    file: db_server.txt
+  db_user:
+    file: db_user.txt
+  db_passwords:
+    file: db_passwords.txt
+  db_database:
+    file: db_database.txt
